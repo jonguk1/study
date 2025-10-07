@@ -2,19 +2,37 @@ package com.spring.test.restapi.exception;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException ex) {
-        return ResponseEntity.badRequest().body(ex.getMessage());
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
     }
 
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<String> handleNullPointer(NullPointerException ex) {
-        return ResponseEntity.internalServerError().body("NullPointerException: " + ex.getMessage());
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleNotFound(NotFoundException ex) {
+        return ResponseEntity.status(404).body(new ErrorResponse(ex.getMessage()));
     }
 
-    // 필요에 따라 다른 예외도 추가 가능
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        String msg = "입력값이 올바르지 않습니다.";
+        var fieldError = ex.getBindingResult().getFieldError();
+        if (fieldError != null) {
+            msg = fieldError.getDefaultMessage();
+        }
+        return ResponseEntity.badRequest().body(new ErrorResponse(msg));
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity<ErrorResponse> handleOther(Exception ex) {
+        return ResponseEntity.internalServerError().body(new ErrorResponse("서버 오류: " + ex.getMessage()));
+    }
 }

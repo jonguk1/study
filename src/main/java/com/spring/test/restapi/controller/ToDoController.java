@@ -1,18 +1,11 @@
 package com.spring.test.restapi.controller;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
-
-import com.spring.test.restapi.entity.ToDo;
+import com.spring.test.restapi.dto.ToDoRequestDto;
+import com.spring.test.restapi.dto.ToDoResponseDto;
 import com.spring.test.restapi.service.ToDoService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/todos")
@@ -26,26 +19,26 @@ public class ToDoController {
 
     // 할 일 등록
     @PostMapping
-    public ToDo addToDo(@RequestBody ToDo toDo) {
-        return toDoService.addToDo(toDo);
+    public ToDoResponseDto addToDo(@RequestBody @Valid ToDoRequestDto dto) {
+        return toDoService.addToDo(dto);
     }
 
     // 할 일 전체 목록 조회
     @GetMapping
-    public List<ToDo> getAllToDos() {
+    public List<ToDoResponseDto> getAllToDos() {
         return toDoService.getAllToDos();
     }
 
     // 할 일 단건 조회
     @GetMapping("/{id}")
-    public ToDo getToDoById(@PathVariable("id") int id) {
+    public ToDoResponseDto getToDoById(@PathVariable("id") int id) {
         return toDoService.getToDoById(id);
     }
 
     // 할 일 수정
     @PutMapping("/{id}")
-    public ToDo updateToDo(@PathVariable("id") int id, @RequestBody ToDo toDo) {
-        return toDoService.updateToDo(id, toDo);
+    public ToDoResponseDto updateToDo(@PathVariable("id") int id, @RequestBody @Valid ToDoRequestDto dto) {
+        return toDoService.updateToDo(id, dto);
     }
 
     // 할 일 삭제

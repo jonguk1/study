@@ -1,47 +1,55 @@
-// 1. 페이지가 로드되면 할 일 목록을 불러오고, 추가 버튼에 이벤트를 등록
 document.addEventListener('DOMContentLoaded', loadTodos);
 document.getElementById('add-btn').addEventListener('click', addTodo);
-// 아래 한 줄 추가: 입력창에서 엔터키로도 추가
 document.getElementById('todo-input').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') addTodo();
 });
 
-// 2. 할 일 전체 목록을 서버에서 받아와 화면에 표시
 function loadTodos() {
     fetch('/api/todos')
         .then(res => res.json())
         .then(data => {
             const list = document.getElementById('todo-list');
             list.innerHTML = '';
-            data.forEach(todo => {
-                list.appendChild(createTodoItem(todo));
-            });
+            data.forEach(todo => list.appendChild(createTodoItem(todo)));
         });
 }
 
-// 3. 할 일 추가 (입력값을 서버에 POST)
 function addTodo() {
     const input = document.getElementById('todo-input');
     const content = input.value.trim();
-    if (!content) return;
+    if (!content) {
+        showError('할 일을 입력하세요.');
+        return;
+    }
     fetch('/api/todos', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({content, completed: false})
     })
+    .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.message); }))
     .then(() => {
         input.value = '';
         loadTodos();
-    });
+    })
+    .catch(err => showError(err.message));
 }
 
-// 4. 할 일 항목 하나를 생성 (체크박스, 인라인 수정, 삭제 버튼 포함)
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.classList.remove('d-none');
+    clearTimeout(showError.timeoutId);
+    showError.timeoutId = setTimeout(() => {
+        errorDiv.classList.add('d-none');
+        errorDiv.textContent = '';
+    }, 2000);
+}
+
 function createTodoItem(todo) {
     const li = document.createElement('li');
     li.className = 'list-group-item d-flex justify-content-between align-items-center';
     if (todo.completed) li.classList.add('completed');
 
-    // 4-1. 완료 체크박스 (원형)
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';
     checkbox.className = 'form-check-input me-2';
@@ -52,7 +60,6 @@ function createTodoItem(todo) {
             .then(loadTodos);
     };
 
-    // 4-2. 할 일 내용 (더블클릭 시 인라인 수정)
     const span = document.createElement('span');
     span.textContent = todo.content;
     span.style.flex = '1';
@@ -78,23 +85,25 @@ function createTodoItem(todo) {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({content: newContent, completed: todo.completed})
-                }).then(loadTodos);
+                })
+                .then(res => res.ok ? res.json() : res.json().then(err => { throw new Error(err.message); }))
+                .then(loadTodos)
+                .catch(err => showError(err.message));
             } else {
                 li.replaceChild(span, input);
             }
         }
     };
 
-    // 4-3. 삭제 버튼 (이모지 휴지통)
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-sm btn-outline-danger ms-2';
-    delBtn.textContent = '🗑️'; // 이모지 휴지통
+    delBtn.textContent = '🗑️';
     delBtn.title = '삭제';
-
     delBtn.onclick = () => {
         if (confirm('삭제하시겠습니까?')) {
             fetch(`/api/todos/${todo.id}`, {method: 'DELETE'})
-                .then(loadTodos);
+                .then(loadTodos)
+                .catch(err => showError(err.message));
         }
     };
 
