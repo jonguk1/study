@@ -38,25 +38,25 @@ public class ToDoController {
 
     // 할 일 단건 조회
     @GetMapping("/{id}")
-    public ToDo getToDoById(@PathVariable int id) {
+    public ToDo getToDoById(@PathVariable("id") int id) {
         return toDoService.getToDoById(id);
     }
 
     // 할 일 수정
     @PutMapping("/{id}")
-    public ToDo updateToDo(@PathVariable int id, @RequestBody ToDo toDo) {
+    public ToDo updateToDo(@PathVariable("id") int id, @RequestBody ToDo toDo) {
         return toDoService.updateToDo(id, toDo);
     }
 
     // 할 일 삭제
     @DeleteMapping("/{id}")
-    public void deleteToDo(@PathVariable int id) {
+    public void deleteToDo(@PathVariable("id") int id) {
         toDoService.deleteToDo(id);
     }
 
     // 할 일 완료/미완료 상태 변경
     @PutMapping("/{id}/toggle")
-    public void toggleCompleted(@PathVariable int id) {
+    public void toggleCompleted(@PathVariable("id") int id) {
         toDoService.toggleCompleted(id);
     }
 
