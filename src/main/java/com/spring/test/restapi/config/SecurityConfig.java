@@ -40,6 +40,8 @@ public class SecurityConfig {
                                 "/index.html",
                                 "/todo", // 여기가 todo.html로 forward되는 경로
                                 "/todo.html", // 실제 정적 파일도 허용해야 함
+                                "/register.html",
+                                "/register",
                                 "/user.js",
                                 "/todo.js",
                                 "/todo.css",

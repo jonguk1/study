@@ -1,11 +1,17 @@
-document.addEventListener('DOMContentLoaded', loadTodos);
-document.getElementById('add-btn').addEventListener('click', addTodo);
-document.getElementById('todo-input').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') addTodo();
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('add-btn')) {
+        document.getElementById('add-btn').addEventListener('click', addTodo);
+    }
+    if (document.getElementById('todo-input')) {
+        document.getElementById('todo-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') addTodo();
+        });
+    }
+    if (typeof loadTodos === 'function') loadTodos();
 });
 
 function loadTodos() {
-    fetch('/api/todos')
+    fetchWithAuth('/api/todos')
         .then(res => res.json())
         .then(data => {
             const list = document.getElementById('todo-list');
@@ -21,7 +27,7 @@ function addTodo() {
         showError('할 일을 입력하세요.');
         return;
     }
-    fetch('/api/todos', {
+    fetchWithAuth('/api/todos', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({content, completed: false})
@@ -32,17 +38,6 @@ function addTodo() {
         loadTodos();
     })
     .catch(err => showError(err.message));
-}
-
-function showError(message) {
-    const errorDiv = document.getElementById('error-message');
-    errorDiv.textContent = message;
-    errorDiv.classList.remove('d-none');
-    clearTimeout(showError.timeoutId);
-    showError.timeoutId = setTimeout(() => {
-        errorDiv.classList.add('d-none');
-        errorDiv.textContent = '';
-    }, 2000);
 }
 
 function createTodoItem(todo) {
@@ -56,7 +51,7 @@ function createTodoItem(todo) {
     checkbox.checked = todo.completed;
     checkbox.style.borderRadius = '50%';
     checkbox.onclick = () => {
-        fetch(`/api/todos/${todo.id}/toggle`, {method: 'PUT'})
+        fetchWithAuth(`/api/todos/${todo.id}/toggle`, {method: 'PUT'})
             .then(loadTodos);
     };
 
@@ -81,7 +76,7 @@ function createTodoItem(todo) {
         function saveEdit() {
             const newContent = input.value.trim();
             if (newContent && newContent !== todo.content) {
-                fetch(`/api/todos/${todo.id}`, {
+                fetchWithAuth(`/api/todos/${todo.id}`, {
                     method: 'PUT',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({content: newContent, completed: todo.completed})
@@ -101,7 +96,7 @@ function createTodoItem(todo) {
     delBtn.title = '삭제';
     delBtn.onclick = () => {
         if (confirm('삭제하시겠습니까?')) {
-            fetch(`/api/todos/${todo.id}`, {method: 'DELETE'})
+            fetchWithAuth(`/api/todos/${todo.id}`, {method: 'DELETE'})
                 .then(loadTodos)
                 .catch(err => showError(err.message));
         }
@@ -109,4 +104,27 @@ function createTodoItem(todo) {
 
     li.append(checkbox, span, delBtn);
     return li;
+}
+
+// 인증이 필요한 API 요청은 반드시 fetchWithAuth 사용
+function fetchWithAuth(url, options = {}) {
+    const token = localStorage.getItem('jwtToken');
+    return fetch(url, {
+        ...options,
+        headers: {
+            ...options.headers,
+            'Authorization': token ? 'Bearer ' + token : ''
+        }
+    });
+}
+
+function showError(message) {
+    const errorDiv = document.getElementById('error-message');
+    errorDiv.textContent = message;
+    errorDiv.classList.remove('d-none');
+    clearTimeout(showError.timeoutId);
+    showError.timeoutId = setTimeout(() => {
+        errorDiv.classList.add('d-none');
+        errorDiv.textContent = '';
+    }, 2000);
 }

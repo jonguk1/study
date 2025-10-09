@@ -6,6 +6,7 @@ import com.spring.test.restapi.dto.ToDoRequestDto;
 import com.spring.test.restapi.dto.ToDoResponseDto;
 import com.spring.test.restapi.service.ToDoService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/todos")
@@ -19,38 +20,45 @@ public class ToDoController {
 
     // 할 일 등록
     @PostMapping
-    public ToDoResponseDto addToDo(@RequestBody @Valid ToDoRequestDto dto) {
-        return toDoService.addToDo(dto);
+    public ToDoResponseDto addToDo(@RequestBody @Valid ToDoRequestDto dto, Authentication authentication) {
+        String username = authentication.getName();
+        return toDoService.addToDo(dto, username);
     }
 
     // 할 일 전체 목록 조회
     @GetMapping
-    public List<ToDoResponseDto> getAllToDos() {
-        return toDoService.getAllToDos();
+    public List<ToDoResponseDto> getAllToDos(Authentication authentication) {
+        String username = authentication.getName();
+        return toDoService.getAllToDos(username);
     }
 
     // 할 일 단건 조회
     @GetMapping("/{id}")
-    public ToDoResponseDto getToDoById(@PathVariable("id") int id) {
-        return toDoService.getToDoById(id);
+    public ToDoResponseDto getToDoById(@PathVariable("id") int id, Authentication authentication) {
+        String username = authentication.getName();
+        return toDoService.getToDoById(id, username);
     }
 
     // 할 일 수정
     @PutMapping("/{id}")
-    public ToDoResponseDto updateToDo(@PathVariable("id") int id, @RequestBody @Valid ToDoRequestDto dto) {
-        return toDoService.updateToDo(id, dto);
+    public ToDoResponseDto updateToDo(@PathVariable("id") int id, @RequestBody @Valid ToDoRequestDto dto,
+            Authentication authentication) {
+        String username = authentication.getName();
+        return toDoService.updateToDo(id, dto, username);
     }
 
     // 할 일 삭제
     @DeleteMapping("/{id}")
-    public void deleteToDo(@PathVariable("id") int id) {
-        toDoService.deleteToDo(id);
+    public void deleteToDo(@PathVariable("id") int id, Authentication authentication) {
+        String username = authentication.getName();
+        toDoService.deleteToDo(id, username);
     }
 
     // 할 일 완료/미완료 상태 변경
     @PutMapping("/{id}/toggle")
-    public void toggleCompleted(@PathVariable("id") int id) {
-        toDoService.toggleCompleted(id);
+    public void toggleCompleted(@PathVariable("id") int id, Authentication authentication) {
+        String username = authentication.getName();
+        toDoService.toggleCompleted(id, username);
     }
 
 }
