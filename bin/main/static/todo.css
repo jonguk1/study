@@ -1,0 +1,16 @@
+body {
+    min-height: 100vh;
+}
+#todo-list .completed span {
+    color: #aaa;
+    text-decoration: line-through;
+}
+#todo-list input[type="text"] {
+    min-width: 100px;
+    margin-right: 8px;
+}
+.form-check-input[type="checkbox"] {
+    width: 1.2em;
+    height: 1.2em;
+    border-radius: 50%;
+}
