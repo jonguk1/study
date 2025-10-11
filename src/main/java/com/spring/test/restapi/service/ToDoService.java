@@ -49,16 +49,6 @@ public class ToDoService {
                 .toList();
     }
 
-    // 할 일 단건 조회
-    public ToDoResponseDto getToDoById(int id, String username) {
-        User user = getUserByUsername(username);
-        ToDo todo = toDoRepository.findById(id)
-                .filter(t -> t.getUser() != null &&
-                        t.getUser().getId() == user.getId())
-                .orElseThrow(() -> new NotFoundException("해당 할 일이 없거나 권한이 없습니다. id=" + id));
-        return toResponseDto(todo);
-    }
-
     // 할 일 수정
     public ToDoResponseDto updateToDo(int id, ToDoRequestDto dto, String username) {
         User user = getUserByUsername(username);
